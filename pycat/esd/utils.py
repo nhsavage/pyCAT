@@ -30,23 +30,16 @@ def generate_day_constraint_with_window(
         day_of_year, window, calendar='standard'):
     """
     generate two :class:`iris.Constraints <iris.Constraint>` for the time axis:
-
       1. for the exact day of the year over all years
-
-      2. including all days over all years that lie within day_of_year ± window
-
+      2. including all days over all years that lie within day_of_year +/- window
     Args:
-
     * day_of_year (int):
         day of the year in the given calendar
-
     * window (int):
         the size of the temporal window around the given day (in days)
-
     * calendar (str):
         a supported calendar: standard (default), gregorian,
         proleptic_gregorian, noleap, 365_day, all_leap, 366_day, 360_day
-
     Returns:
         a 2-tuple of :class:`iris.Constraints <iris.Constraint>`
         on the time axis
@@ -109,37 +102,33 @@ def generate_day_constraint_with_window(
 def generate_year_constraint_with_window(year, window):
     """
     generate a :class:`iris.Constraint` on the time axis
-    for specified year ± window
-
+    for specified year +/- window
     Args:
-
     * year (int):
         centered year for the constraint
-
     * window (int):
         number of years around the given year
-
     Returns:
-
         an :class:`iris.Constraint` on the time-axis
     """
     first_year = PartialDateTime(year=year - window)
     last_year = PartialDateTime(year=year + window)
+
     return Constraint(time=lambda cell: first_year <= cell.point <= last_year)
 
 
 def generate_month_constraint(month):
     """
     generate an :class:`iris.Constraint` on the time-axis for a specified month
-
     Args:
-
     * month (int):
        the desired month (1..jan, 12..dec)
-
     Returns:
-
        an :class:`iris.Constraint` on the time-axis
     """
-    return Constraint(
-        time=lambda cell: cell.point == PartialDateTime(month=month))
+#   return Constraint(time=lambda cell: cell.point == PartialDateTime(month=month))
+# 18.04.2019
+# Change needed as in Python 3 times are read in as cftime objects, which cannot be compared
+# with PartialDateTimes.  Might only be an issue for non-standard calendars (365 day, for example)
+    return Constraint(time=lambda cell: cell.point.month == month)
+

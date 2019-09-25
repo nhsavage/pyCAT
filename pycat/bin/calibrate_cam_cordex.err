@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "merge_bc_output.py", line 71, in <module>
+    level=args.log_level, datefmt='%F'
+  File "/net/project/ukmo/scitools/opt_scitools/environments/default/2019_02_27/lib/python3.6/logging/__init__.py", line 1798, in basicConfig
+    raise ValueError("'stream' and 'filename' should not be "
+ValueError: 'stream' and 'filename' should not be specified together

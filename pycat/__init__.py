@@ -16,7 +16,6 @@
 """
 pyCAT
 =====
-
 A package for bias correction of climate data
 """
 
@@ -38,18 +37,14 @@ config = {
 }
 """
 The config dictionary stores global configuration values for pycat.
-
 In the first instance, the config is defined in ``pycat/__init__.py``. It
 is possible to provide site wide customisations by including a
 ``siteconfig.py`` file along with the pyCAT source code. ``siteconfig.py``
 should contain a function called ``update_config`` which takes the config
 dictionary instance as its first and only argument (from where it is
 possible to update the dictionary howsoever desired).
-
 Keys in the config dictionary:
-
  * ``data_dir`` - the absolute path to a directory where data will be found
-
  * ``tmp_dir`` - the absolute path to a directory where temporary data
                  will be stored
 """
@@ -71,3 +66,4 @@ def tmp_path(*path_to_join):
 
 def data_path(*path_to_join):
     return os.path.join(config['data_dir'], *path_to_join)
+

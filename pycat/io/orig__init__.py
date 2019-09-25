@@ -16,7 +16,6 @@
 import os
 
 import iris
-from iris.util import unify_time_units
 import numpy as np
 from cartopy.crs import Geodetic
 from iris.experimental.equalise_cubes import equalise_attributes
@@ -28,12 +27,6 @@ class Dataset(object):
     A Dataset is holding meta data for an :class:`iris.cube.Cube`
     temporal period and spatial extent as well as cube attributes can
     be set before actually retrieving data from disk
-
-    N.B. This part has been edited by MGS on 15 Jan 2019. The code had an
-    implicit assumption that the data were on a rotated grid; the attribute
-    'coord_system' is not present when the data are on a regular lat-lon grid.
-    The part of the code reading the coord system and calculating the extent
-    of the model domain has been modified.
     """
     days_in_year = {
         'standard': 366, 'gregorian': 366, 'proleptic_gregorian': 366,
@@ -88,8 +81,8 @@ class Dataset(object):
         x = self.cube_list[0].coord(axis="X", dim_coords=True)
         y = self.cube_list[0].coord(axis="Y", dim_coords=True)
 
-        # save the coordinate system - assume Geodetic as data are on a global grid
-        self._coord_system = Geodetic()
+        # save the coordinate system
+        self._coord_system = x.coord_system.as_cartopy_crs()
 
         # make a bounding box in lon/lat
         # if the dataset consists only of one cell/row/column draw a large
@@ -113,8 +106,11 @@ class Dataset(object):
             (np.array([y.bounds[0, 0]] * x.shape[0]), y.bounds[:, 0],
              np.array([y.bounds[-1, -1]] * x.shape[0]), y.bounds[:, -1]))
 
-        east, west = max(x_edges), min(x_edges)
-        north, south = max(y_edges), min(y_edges)
+        ll_crs = Geodetic()
+        lon_lat_edges = ll_crs.transform_points(
+            x.coord_system.as_cartopy_crs(), x_edges, y_edges)[:, :-1]
+        east, west = max(lon_lat_edges[:, 0]), min(lon_lat_edges[:, 0])
+        north, south = max(lon_lat_edges[:, 1]), min(lon_lat_edges[:, 1])
 
         self._orig_extent = (north, east, south, west)
         if remove_bounds:
@@ -165,7 +161,8 @@ class Dataset(object):
         if self.extent != self._orig_extent:
             constraints &= self._extent_constraint()
 
-        cl = self.cube_list.extract(constraints)
+        with iris.FUTURE.context(cell_datetime_objects=True):
+            cl = self.cube_list.extract(constraints)
         equalise_attributes(cl)
 
         merged_cube = self._merge_by_time(cl)
@@ -246,21 +243,14 @@ class Dataset(object):
                 break
             min_dim = min(min_dim, cube.coord(axis='T').shape[0])
 
-# Unify time units. For instance AgMERRA data are 'days since since 1980-1-1 12:00:00' for pre-2000 data
-# but 'days since 1980-1-1 01:00:00' for 2000-on data
-        unify_time_units(cl)
         if min_dim > 1:
-# Shouldn't need to convert units, as is taken care of in the callback function
-#           for cube in cl:
-#               print('Before: ', cube.units)
-#               cube.convert_units(units)
-#               print('After: ', cube.units)
-#               print(cube.coord(axis='T').units)
+            for cube in cl:
+                cube.convert_units(units)
             ret = cl.concatenate_cube()
         else:
             cl_new = iris.cube.CubeList()
             for cube in cl:
-#               cube.convert_units(units)
+                cube.convert_units(units)
                 if cube.coord(axis='T').shape[0] == 1:
                     cl_new.append(cube)
                 else:

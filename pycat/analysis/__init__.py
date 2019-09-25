@@ -15,7 +15,6 @@
 # along with pyCAT. If not, see <http://www.gnu.org/licenses/>.
 """
 A package providing calculation of climate indices.
-
 This module defines a suite of :class:`.Indexer` instances,
 """
 
@@ -36,4 +35,4 @@ class Period(object):
     """
 
     def __init__(self):
-        pass
+pass

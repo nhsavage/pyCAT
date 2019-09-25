@@ -27,27 +27,20 @@ from pycat.analysis.utils import _create_cube, _make_time_dimension
 def consecutive_dry_days(cube, period='year', length=6, threshold=1.):
     """
     calculate consecutive dry days within an iris.cube.Cube
-
     Args:
-
     * cube (iris.cube.Cube):
         An iris.cube.Cube holding precipiation amount in mm/day
     * period (string):
         Period over that the CDD will be calculated. Can be 'year', 'season'
         or 'month'. If period is 'season' or 'month' the CDD will be averaged
         over the years
-
     Kwargs:
-
     * length (int):
         The number of days without rainfall that define a dry period
-
     * threshold (float):
         The upper limit of daily rainfall in mm that indicates
         'no precipitation'
-
     Returns:
-
         An iris.cube.CubeList that holds two iris.cube.Cubes with the longest
         period of dry days in the given period and the mean of the number of
         dry periods with respect to the given length
@@ -55,20 +48,14 @@ def consecutive_dry_days(cube, period='year', length=6, threshold=1.):
     def _cdd_index(array, axis, threshold):
         """
         Calculate the consecutive dry days index.
-
         This function is used as an iris.analysis.Aggregator
-
         Args:
-
         * array (numpy.array or numpy.ma.array):
             array that holds the precipitation data
-
         * axis (int):
             the number of the time-axis
-
         * threshold (float):
             the threshold that indicates a precipiation-less day
-
         Returns:
             the aggregation result, collapsing the 'axis' dimension of
             the 'data' argument
@@ -82,23 +69,16 @@ def consecutive_dry_days(cube, period='year', length=6, threshold=1.):
     def _cdd_periods(array, axis, threshold, length):
         """
         Calculate the number of consecutive dry days periods.
-
         This function is used as an iris.analysis.Aggregator
-
         Args:
-
         * array (numpy.array or numpy.ma.array):
             array that holds the precipitation data
-
         * axis (int):
             the number of the time-axis
-
         * threshold (float):
             the threshold that indicates a precipiation-less day
-
         * length (int):
             number of days that a dry period must last
-
         Returns:
             the aggregation result, collapsing the 'axis' dimension
             of the 'data' argument
@@ -230,6 +210,7 @@ def consecutive_dry_days(cube, period='year', length=6, threshold=1.):
 
         cdd_index_mean.remove_coord('time')
         cdd_periods_mean.remove_coord('time')
+
         return iris.cube.CubeList(
             (cdd_index_mean, cdd_periods_mean)
-        )
+)

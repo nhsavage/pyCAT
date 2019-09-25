@@ -1,0 +1,2 @@
+2019-04-25 09:52:33 INFO: Running merge_bc_output.py --infile=/scratch/hadmi/PyCAT/Colombia/sdm/scaled_distribution_mapping_tasmin_scenario-0_2041-2060_month* --start-year=2041 --end-year=2061 --outfile-base=/data/users/hadmi/CORDEX/CAM/calibrated/CCCma-CanESM2/tasmin_sdm_CAM_CCCma-CanESM2_rcp85_r1i1p1_SMHI-RCA4_v1_day --log-file=log_file.out -v
+2019-04-25 09:52:57 INFO: Writing output files to /data/users/hadmi/CORDEX/CAM/calibrated/CCCma-CanESM2

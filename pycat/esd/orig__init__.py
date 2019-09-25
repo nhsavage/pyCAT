@@ -14,14 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with pyCAT. If not, see <http://www.gnu.org/licenses/>.
 
-# N.B. This file was modified to by MGS on 15 Jan 2019 to remove the
-# regridding / interpolator.
-
 from tempfile import gettempdir
 
 import numpy as np
+from iris.analysis import Linear
 
-from .methods import quantile_mapping, scaled_distribution_mapping, simple_ratio_scaling
+from .methods import quantile_mapping, scaled_distribution_mapping
 
 
 class BiasCorrector(object):
@@ -32,7 +30,8 @@ class BiasCorrector(object):
 
     def __init__(self, call_func, observation, model, scenarios,
                  reference_period=None, correction_period=None,
-                 time_unit='day', work_dir=gettempdir()):
+                 time_unit='day', work_dir=gettempdir(),
+                 interpolator=Linear(), save_regridded=False):
         """
         Args:
         * call_func (callable):
@@ -55,8 +54,16 @@ class BiasCorrector(object):
         * time_unit (str):
             correction will be performed on daily (day) or
             monthly (month) basis
+        * interpolator:
+            an available interpolation scheme for regridding to the
+            observational dataset. Currently available schemes are:
+            * :class:`iris.analysis.Linear` (default)
+            * :class:`iris.analysis.Nearest`
+            * :class:`iris.analysis.AreaWeighted`
         * work_dir (path):
             directory where intermediate files will be written
+        * save_regridded (boolean):
+            wheter regridded data shall be stored to disk (default: False)
         """
         self.call_func = call_func
         self.obs = observation
@@ -91,8 +98,9 @@ class BiasCorrector(object):
                 sce.period = correction_period
 
         self.time_unit = time_unit
+        self.interpolator = interpolator
         self.work_dir = work_dir
-
+        self.save_regridded = save_regridded
 
     def correct(self, unit_list=None, *args, **kwargs):
         """
@@ -112,6 +120,7 @@ class BiasCorrector(object):
         from numpy import ma
         import collections
 
+        regridder = None
         if isinstance(unit_list, int):
             unit_list = [unit_list]
         elif isinstance(unit_list, collections.Iterable):
@@ -151,12 +160,16 @@ class BiasCorrector(object):
             obs_cube = obs_cube or self.obs.get_cube(window_constraint)
             mod_cube = self.mod.get_cube(window_constraint)
 
+            regridder = regridder or self.interpolator.regridder(
+                mod_cube, obs_cube)
+            mod_cube = regridder(mod_cube)
+
             obs_first_time_slice = obs_cube.slices_over(
                 obs_cube.coords(axis='T', dim_coords=True)).next()
 
             sce_cubes = iris.cube.CubeList()
             for sce in self.sce:
-                sce_cube = sce.get_cube(single_constraint)
+                sce_cube = regridder(sce.get_cube(single_constraint))
                 try:
                     # mask the scenario data if the observation has a mask
                     sce_cube.data = ma.masked_array(
@@ -170,6 +183,19 @@ class BiasCorrector(object):
             fn_template = '{method}_{variable}_scenario-{scenario:d}' \
                           '_{startyear}-{endyear}_' \
                           '{time_unit}-{unit:0{padding}d}.nc'
+            if self.save_regridded:
+                for sce_number, sce_cube in enumerate(sce_cubes):
+                    time_coord = sce_cube.coord('time')
+                    startyear, endyear = [
+                        date.year for date in
+                        time_coord.units.num2date(
+                            time_coord.points[np.array([0, -1])])]
+                    filename = fn_template.format(
+                        method='regridded', variable=sce_cube.var_name,
+                        startyear=startyear, endyear=endyear,
+                        scenario=sce_number, time_unit=self.time_unit,
+                        unit=unit, padding=padding)
+                    iris.save(sce_cube, os.path.join(self.work_dir, filename))
 
             # call the correction function
             self.call_func(obs_cube, mod_cube, sce_cubes, *args, **kwargs)
@@ -187,7 +213,6 @@ class BiasCorrector(object):
                     variable=sce_cube.var_name, scenario=sce_number,
                     startyear=startyear, endyear=endyear,
                     time_unit=self.time_unit, unit=unit, padding=padding)
-                print('Saving corrected data to:', os.path.join(self.work_dir, filename))
                 iris.save(sce_cube, os.path.join(self.work_dir, filename))
 
 
@@ -214,17 +239,5 @@ class ScaledDistributionMapping(BiasCorrector):
     def __init__(self, observation, model, scenarios, *args, **kwargs):
         super(ScaledDistributionMapping, self).__init__(
             scaled_distribution_mapping, observation, model, scenarios,
-            time_unit='month', *args, **kwargs)
-
-
-class SimpleRatioScaling(BiasCorrector):
-
-    """
-    convenience class for simple ratio scaling
-    """
-
-    def __init__(self, observation, model, scenarios, *args, **kwargs):
-        super(SimpleRatioScaling, self).__init__(
-            simple_ratio_scaling, observation, model, scenarios,
             time_unit='month', *args, **kwargs)
 

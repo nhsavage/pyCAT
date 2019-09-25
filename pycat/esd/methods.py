@@ -20,38 +20,30 @@ A bias correction function operates on 2 :class:`iris.cube.Cubes
 :class:`iris.cube.CubeList` holding any desired number of future model
 :class:`iris.cube.Cubes <iris.cube.Cube>`.  The correction will be
 applied to all future models with the same reference data.
-
 Any correction function must have the following singature:
 obs_cube (:class:`iris.cube.Cube`), mod_cube (:class:`iris.cube.Cube`),
 sce_cubes (:class:`iris.cube.CubeList`), \*args, \**kwargs
 """
 
 import logging
-
 import numpy as np
 
 
 def quantile_mapping(obs_cube, mod_cube, sce_cubes, *args, **kwargs):
     """
     Quantile Mapping
-
     apply quantile mapping to all scenario cubes using the distributions
     of obs_cube and mod_cube
-
     Args:
-
     * obs_cube (:class:`iris.cube.Cube`):
         the observational data
-
     * mod_cube (:class:`iris.cube.Cube`):
         the model data at the reference period
-
     * sce_cubes (:class:`iris.cube.CubeList`):
         the scenario data that shall be corrected
     """
-    from statsmodels.distributions.empirical_distribution import ECDF
+    from ecdf import ECDF
 
-    obs_cube_mask = np.ma.getmask(obs_cube.data)
     cell_iterator = np.nditer(obs_cube.data[0], flags=['multi_index'])
     while not cell_iterator.finished:
         index_list = list(cell_iterator.multi_index)
@@ -59,7 +51,8 @@ def quantile_mapping(obs_cube, mod_cube, sce_cubes, *args, **kwargs):
 
         index_list.insert(0, 0)
         index = tuple(index_list)
-        if obs_cube_mask and obs_cube_mask[index]:
+        if isinstance(obs_cube.data, np.ma.MaskedArray) \
+           and obs_cube.data.mask[index]:
             continue
 
         index_list[0] = slice(0, None, 1)
@@ -76,35 +69,25 @@ def quantile_mapping(obs_cube, mod_cube, sce_cubes, *args, **kwargs):
             sce_cube.data[index] += corr
 
 
-def relative_sdm(
-        obs_cube, mod_cube, sce_cubes, *args, **kwargs):
+def relative_sdm(obs_cube, mod_cube, sce_cubes, *args, **kwargs):
     """
     apply relative scaled distribution mapping to all scenario cubes
     assuming a gamma distributed parameter (with lower limit zero)
-
     if one of obs, mod or sce data has less than min_samplesize valid
     values, the correction will NOT be performed but the original data
     is output
-
     Args:
-
     * obs_cube (:class:`iris.cube.Cube`):
         the observational data
-
     * mod_cube (:class:`iris.cube.Cube`):
         the model data at the reference period
-
     * sce_cubes (:class:`iris.cube.CubeList`):
         the scenario data that shall be corrected
-
     Kwargs:
-
     * lower_limit (float):
         assume values below lower_limit to be zero (default: 0.1)
-
     * cdf_threshold (float):
         limit of the cdf-values (default: .99999999)
-
     * min_samplesize (int):
         minimal number of samples (e.g. wet days) for the gamma fit
         (default: 10)
@@ -115,7 +98,6 @@ def relative_sdm(
     cdf_threshold = kwargs.get('cdf_threshold', .99999999)
     min_samplesize = kwargs.get('min_samplesize', 10)
 
-    obs_cube_mask = np.ma.getmask(obs_cube.data)
     cell_iterator = np.nditer(obs_cube.data[0], flags=['multi_index'])
     while not cell_iterator.finished:
         index_list = list(cell_iterator.multi_index)
@@ -125,7 +107,8 @@ def relative_sdm(
         index = tuple(index_list)
 
         # consider only cells with valid observational data
-        if obs_cube_mask and obs_cube_mask[index]:
+        if isinstance(obs_cube.data, np.ma.MaskedArray) \
+           and obs_cube.data.mask[index]:
             continue
 
         index_list[0] = slice(0, None, 1)
@@ -161,11 +144,12 @@ def relative_sdm(
             sce_argsort = np.argsort(sce_data)
             sce_gamma = gamma.fit(sce_raindays, floc=0)
 
-            expected_sce_raindays = min(
-                np.round(
-                    len(sce_data) * obs_frequency * sce_frequency
-                    / mod_frequency),
-                len(sce_data))
+# MGS
+# Added int() around calculation; expected_sce_raindays sometimes returned as a float
+# which cases an error below on last line of function bar 1.
+            expected_sce_raindays = int(min(
+                np.round(len(sce_data) * obs_frequency * sce_frequency / mod_frequency),
+                len(sce_data)))
 
             sce_cdf = gamma.cdf(np.sort(sce_raindays), *sce_gamma)
             sce_cdf[sce_cdf > cdf_threshold] = cdf_threshold
@@ -212,25 +196,18 @@ def relative_sdm(
             sce_cube.data[index] = correction
 
 
-def absolute_sdm(
-        obs_cube, mod_cube, sce_cubes, *args, **kwargs):
+def absolute_sdm(obs_cube, mod_cube, sce_cubes, *args, **kwargs):
     """
     apply absolute scaled distribution mapping to all scenario cubes
     assuming a normal distributed parameter
-
     Args:
-
     * obs_cube (:class:`iris.cube.Cube`):
         the observational data
-
     * mod_cube (:class:`iris.cube.Cube`):
         the model data at the reference period
-
     * sce_cubes (:class:`iris.cube.CubeList`):
         the scenario data that shall be corrected
-
     Kwargs:
-
     * cdf_threshold (float):
         limit of the cdf-values (default: .99999)
     """
@@ -239,7 +216,6 @@ def absolute_sdm(
 
     cdf_threshold = kwargs.get('cdf_threshold', .99999)
 
-    obs_cube_mask = np.ma.getmask(obs_cube.data)
     cell_iterator = np.nditer(obs_cube.data[0], flags=['multi_index'])
     while not cell_iterator.finished:
         index_list = list(cell_iterator.multi_index)
@@ -247,7 +223,8 @@ def absolute_sdm(
 
         index_list.insert(0, 0)
         index = tuple(index_list)
-        if obs_cube_mask and obs_cube_mask[index]:
+        if isinstance(obs_cube.data, np.ma.MaskedArray) \
+           and obs_cube.data.mask[index]:
             continue
 
         index_list[0] = slice(0, None, 1)
@@ -331,28 +308,20 @@ def absolute_sdm(
             sce_cube.data[index] = correction
 
 
-def scaled_distribution_mapping(
-        obs_cube, mod_cube, sce_cubes, *args, **kwargs):
+def scaled_distribution_mapping(obs_cube, mod_cube, sce_cubes, *args, **kwargs):
     """
     Scaled Distribution Mapping
-
     apply scaled distribution mapping to all scenario cubes
-
     the method works differently for different meteorological parameters
-
     * air_temperature
         :meth:`absolute_sdm` using normal distribution
     * precipitation_amount, surface_downwelling_shortwave_flux_in_air
         :meth:`relative_sdm` using gamma distribution
-
     Args:
-
     * obs_cube (:class:`iris.cube.Cube`):
         the observational data
-
     * mod_cube (:class:`iris.cube.Cube`):
         the model data at the reference period
-
     * sce_cubes (:class:`iris.cube.CubeList`):
         the scenario data that shall be corrected
     """
@@ -360,10 +329,59 @@ def scaled_distribution_mapping(
         'air_temperature': absolute_sdm,
         'precipitation_amount': relative_sdm,
         'surface_downwelling_shortwave_flux_in_air': relative_sdm,
+        'relative_humidity': relative_sdm,
+        'wind_speed': relative_sdm
     }
     try:
         implemented_parameters[obs_cube.standard_name](
             obs_cube, mod_cube, sce_cubes, *args, **kwargs)
     except KeyError:
-        logging.error(
-            'SDM not implemented for {}'.format(obs_cube.standard_name))
+        logging.error('SDM not implemented for {}'.format(obs_cube.standard_name))
+
+
+def simple_ratio_scaling(obs_cube, mod_cube, sce_cubes, *args, **kwargs):
+    """
+    Simple ratio scaling
+    Multiply observed data by ratio of modelled scenario and baseline data
+    See paper by Haddeland I. 2012. Effects of climate model radiation, humidity
+    and wind estimates on hydrological simulations.
+    Hydrology and Earth System Sciences, 16, 305-318
+    This method is only suitable for meteorological variables with a lower limit
+    ("positive definite"):
+      precipitation_amount, surface_downwelling_shortwave_flux_in_air,
+      relative_humidity, wind_speed
+
+    Args:
+    * obs_cube (:class:`iris.cube.Cube`):
+        the observational data
+    * mod_cube (:class:`iris.cube.Cube`):
+        the model data at the reference period
+    * sce_cubes (:class:`iris.cube.CubeList`):
+        the scenario data to be corrected
+    """
+
+    cell_iterator = np.nditer(obs_cube.data[0], flags=['multi_index'])
+    while not cell_iterator.finished:
+        index_list = list(cell_iterator.multi_index)
+        cell_iterator.iternext()
+
+        index_list.insert(0, 0)
+        index = tuple(index_list)
+        if isinstance(obs_cube.data, np.ma.MaskedArray) \
+           and obs_cube.data.mask[index]:
+            continue
+
+        index_list[0] = slice(0, None, 1)
+        index = tuple(index_list)
+
+        # consider only cells with valid observational data
+        obs_data = obs_cube.data[index]
+        mod_data = mod_cube.data[index]
+
+        obs_mean = obs_data.mean()
+        mod_mean = mod_data.mean()
+
+        for sce_cube in sce_cubes:
+            sce_data = sce_cube[index].data
+            sce_cube.data[index] = sce_data * obs_mean / mod_mean
+

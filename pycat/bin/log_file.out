@@ -1,0 +1,23 @@
+2019-02-05 09:48:41 INFO: Running merge_bc_output.py --infile=/scratch/hadmi/PyCAT/Colombia/sdm/scaled_distribution_mapping_tmax_scenario-0_2021-2040_month* --start-year=2038 --end-year=2040 --outfile-base=/scratch/hadmi/PyCAT/Colombia/sdm/sdm_tmax_scenario-0 --log-file=log_file.out -v
+2019-02-05 09:48:51 INFO: Writing output files to /scratch/hadmi/PyCAT/Colombia/sdm
+2019-02-05 15:18:16 INFO: Running merge_bc_output.py --infile=/scratch/hadmi/PyCAT/Colombia/sdm/scaled_distribution_mapping_tmin_scenario-0_2021-2040_month* --outfile-base=/scratch/hadmi/PyCAT/Colombia/sdm/tmin_sdm_CAM_CCCma-CanESM2_rcp85_r1i1p1_SMHI-RCA4_v1_day --log-file=log_file.out -v
+2019-02-05 15:18:34 INFO: Writing output files to /scratch/hadmi/PyCAT/Colombia/sdm
+2019-02-07 09:12:40 INFO: Running merge_bc_output.py --infile=/scratch/hadmi/PyCAT/Colombia/sdm/scaled_distribution_mapping_prate_scenario-0_2021-2040_month* --outfile-base=/scratch/hadmi/PyCAT/Colombia/sdm/pr_sdm_CAM_CCCma-CanESM2_rcp85_r1i1p1_SMHI-RCA4_v1_day --log-file=log_file.out -v
+2019-02-07 09:12:56 INFO: Writing output files to /scratch/hadmi/PyCAT/Colombia/sdm
+2019-02-07 11:03:13 INFO: Running merge_bc_output.py --infile=/scratch/hadmi/PyCAT/Colombia/sdm/scaled_distribution_mapping_prate_scenario-0_2021-2040_month* --start-year=2027 --end-year=2040 --outfile-base=/scratch/hadmi/PyCAT/Colombia/sdm/pr_sdm_CAM_CCCma-CanESM2_rcp85_r1i1p1_SMHI-RCA4_v1_day --log-file=log_file.out -v
+2019-02-07 11:03:29 INFO: Writing output files to /scratch/hadmi/PyCAT/Colombia/sdm
+2019-02-07 12:26:55 INFO: Running merge_bc_output.py --infile=/scratch/hadmi/PyCAT/Colombia/sdm/scaled_distribution_mapping_prate_scenario-0_2021-2040_month* --start-year=2031 --end-year=2041 --outfile-base=/scratch/hadmi/PyCAT/Colombia/sdm/pr_sdm_CAM_CCCma-CanESM2_rcp85_r1i1p1_SMHI-RCA4_v1_day --log-file=log_file.out -v
+2019-02-07 12:27:07 WARNING: Wanted end year not in data 2040 < 2041
+2019-02-07 12:27:07 INFO: Writing output files to /scratch/hadmi/PyCAT/Colombia/sdm
+2019-02-07 15:02:41 INFO: Running merge_bc_output.py --infile=/scratch/hadmi/PyCAT/Colombia/sdm/scaled_distribution_mapping_prate_scenario-0_2021-2040_month* --start-year=2040 --end-year=2041 --outfile-base=/scratch/hadmi/PyCAT/Colombia/sdm/pr_sdm_CAM_CCCma-CanESM2_rcp85_r1i1p1_SMHI-RCA4_v1_day --log-file=log_file.out -v
+2019-02-07 15:02:47 WARNING: Wanted end year not in data 2040 < 2041
+2019-02-07 15:02:47 INFO: Writing output files to /scratch/hadmi/PyCAT/Colombia/sdm
+2019-02-08 14:11:21 INFO: Running merge_bc_output.py --infile=/scratch/hadmi/PyCAT/Colombia/sdm/scaled_distribution_mapping_prate_scenario-0_2021-2040_month* --start-year=2021 --end-year=2041 --outfile-base=/scratch/hadmi/PyCAT/Colombia/sdm/pr_sdm_CAM_CCCma-CanESM2_rcp85_r1i1p1_SMHI-RCA4_v1_day --log-file=log_file.out -v
+2019-02-08 14:11:40 WARNING: Wanted end year not in data 2040 < 2041
+2019-02-08 14:11:40 INFO: Writing output files to /scratch/hadmi/PyCAT/Colombia/sdm
+2019-02-08 15:11:21 INFO: Running merge_bc_output.py --infile=/scratch/hadmi/PyCAT/Colombia/sdm/scaled_distribution_mapping_prate_scenario-0_2021-2040_month* --start-year=2021 --end-year=2041 --outfile-base=/scratch/hadmi/PyCAT/Colombia/sdm/pr_sdm_CAM_CCCma-CanESM2_rcp85_r1i1p1_SMHI-RCA4_v1_day --log-file=log_file.out -v
+2019-02-08 15:11:36 WARNING: Wanted end year not in data 2040 < 2041
+2019-02-08 15:11:36 INFO: Writing output files to /scratch/hadmi/PyCAT/Colombia/sdm
+2019-03-04 11:44:39 INFO: Running merge_bc_output.py --infile=/scratch/hadmi/PyCAT/Colombia/sdm/scaled_distribution_mapping_rhstmax_scenario-0_2021-2040_month* --start-year=2021 --end-year=2040 --outfile-base=/data/users/hadmi/CORDEX/CAM/sdm/rhstmax_sdm_CAM_CCCma-CanESM2_rcp85_r1i1p1_SMHI-RCA4_v1_day --log-file=log_file.out -v
+2019-03-04 11:51:58 INFO: Running merge_bc_output.py --infile=/scratch/hadmi/PyCAT/Colombia/sdm/simple_ratio_scaling_rhstmax_scenario-0_2021-2040_month* --start-year=2021 --end-year=2040 --outfile-base=/data/users/hadmi/CORDEX/CAM/sdm/rhstmax_sdm_CAM_CCCma-CanESM2_rcp85_r1i1p1_SMHI-RCA4_v1_day --log-file=log_file.out -v
+2019-03-04 11:52:21 INFO: Writing output files to /data/users/hadmi/CORDEX/CAM/sdm

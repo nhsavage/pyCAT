@@ -1,0 +1,4 @@
+2019-02-08 14:48:47 INFO: Running merge_bc_output.py --infile=/scratch/hadmi/PyCAT/Colombia/sdm/scaled_distribution_mapping_prate_scenario-0_2021-2040_month* --start-year=2021 --end-year=2021 --outfile-base=/scratch/hadmi/PyCAT/Colombia/sdm/pr_sdm_CAM_CCCma-CanESM2_rcp85_r1i1p1_SMHI-RCA4_v1_day --log-file=log_file_2.out -v
+2019-02-08 14:48:52 INFO: Writing output files to /scratch/hadmi/PyCAT/Colombia/sdm
+2019-02-08 14:54:23 INFO: Running merge_bc_output.py --infile=/scratch/hadmi/PyCAT/Colombia/sdm/scaled_distribution_mapping_prate_scenario-0_2021-2040_month* --start-year=2021 --end-year=2021 --outfile-base=/scratch/hadmi/PyCAT/Colombia/sdm/pr_sdm_CAM_CCCma-CanESM2_rcp85_r1i1p1_SMHI-RCA4_v1_day --log-file=log_file_2.out -v
+2019-02-08 14:54:27 INFO: Writing output files to /scratch/hadmi/PyCAT/Colombia/sdm
